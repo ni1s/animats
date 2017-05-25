@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #    pyAnimat - Simulate Animats using Transparent Graphs as a way to AGI
-#    Copyright (C) 2017  Nils Svangård
+#    Copyright (C) 2017  Nils Svangård, Claes Strannegård
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
