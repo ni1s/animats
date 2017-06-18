@@ -1,0 +1,47 @@
+{
+  "description": "Learn to approach flowers.",
+  "iterations": 200,
+  "playback": true,
+  "world": "           f        \n  f                 \n                f   \n                    \n                f   \n       p            \n           f        \n                f   \n                    \n f            p     \n       f            \nf                   \n                    \n                    \n    p      f        \n                    \n                f   \n                    \n  f                 \n                    ",
+  "torus":true,
+  "objectives":["sugar"],
+  "blocks": {
+    "f":  {"scent_left":0.01, "scent_right":0.01},
+    "p":  {"scent_left":-0.01, "scent_right":-0.01},
+    " ":  {"scent_left":-0.01, "scent_right":-0.01}
+  },
+  "rewards":{
+    "up": { "*":{"sugar":-0.005} },
+    "turn_right": { "*":{"sugar":-0.005} },
+    "turn_left": { "*":{"sugar":-0.005} }
+  },
+  "transform": {
+    "up": { "f": " ", "p":  " " },
+    "turn_left": { "f": " ", "p":  " " },
+    "turn_right": { "f": " ", "p":  " " }
+  },
+  "agent":{
+    "wellbeeing_const": { "sugar": 0 },
+    "wellbeeing_function": "min",
+    "surprise_const": 2.0,
+    "features":{"SEQ":0, "AND":1},
+    "network":{
+      "sensors": { "gradient":["scent_left", "scent_right"] },
+      "motors":["up", "turn_left", "turn_right"],
+      "epsilon":0.1,
+      "utility_function": "min+",
+      "q_function": "mean",
+      "max_reward_history": 10,
+      "q_learning_factor":0.1,
+      "q_discount_factor":0.5,
+      "reward_learning_factor": 0.5
+    },
+    "states": ["dummy state"],
+    "PLOTTER_ENABLED":true,
+    "PLOTTER_EVERY_FRAME":false
+  },
+  "movement":{
+    "turn_left": {"dummy state": ["turn_left", "up"]},
+    "turn_right": {"dummy state": ["turn_right", "up"]}
+  }
+}

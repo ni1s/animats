@@ -26,10 +26,7 @@ from pprint import pprint
 N_REPEATS = 1
 
 if __name__ == "__main__":
-#    conf = json.load(file("examples/example-1-copepod.json"))
-    conf = json.load(file("examples/example-2-sheep.json"))
-#    conf = json.load(file("examples/example-3-swamp.json"))
-#    conf = json.load(file("examples/example-4-seq.json"))
+    conf = json.load(file("examples/example-bee.json"))
 
     config = EnvironmentConfig(conf)
     print conf
@@ -58,6 +55,7 @@ if __name__ == "__main__":
             pprint(agent.surpriseMatrix_SEQ)
 
         wellbeeings.append(agent.wellbeeingTrail)
+        env.endPlayback()
 
     # Save the wellbeeing trails to file
     fp = open( os.path.join(config.outputPath, "wellbeeing.csv"), "w")

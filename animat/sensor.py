@@ -21,15 +21,24 @@ from node import *
 
 
 class SensorNode(Node):
-    def __init__(self, name, sense=None):
+    def __init__(self, name, sensor, environment):
         Node.__init__(self, name, permanent=True)
-        self.sense=sense
+        self.sensor=sensor
+        self.environment=environment
 
     def tick(self, time):
         if Node.tick(self, time):
-            x = self.sense(time)
+            x = self.readSensor()
             if x: self.activate(time)
             else: self.deactivate(time)
             return True
         else:
             return False
+
+    def readSensor(self):
+        if self.sensor == 't': return 1
+        delta=(0,0)
+        cell = self.environment.currentCell(delta)
+        observation = self.environment.config.blocks.get(cell,{})
+        return observation.get(self.sensor,0)
+

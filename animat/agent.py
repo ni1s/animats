@@ -58,6 +58,8 @@ class AgentConfig:
         self.PLOTTER_ENABLED = conf.get("PLOTTER_ENABLED", False)
         self.PLOTTER_EVERY_FRAME = conf.get("PLOTTER_EVERY_FRAME", False)
         self.features = conf.get("features", {})
+        self.states = conf.get("states", {})
+        self.state_change = conf.get("state change", {})
 
 # y=0 up
 # x=0 left
@@ -68,7 +70,7 @@ class Agent:
         self.config = config
         self.environment = environment
         self.position = position
-        self.orientation = 0 # 0=up, 1=right, 2=down, 3=left
+        self.orientation = 0 # 0=up, 2=right, 4=down, 6=left
         self.network = network
         self.environment = environment
         self.growthRate = growthRate
@@ -81,6 +83,10 @@ class Agent:
         self.surpriseMatrix_SEQ = {}
         self._wellbeeingFunc = WELLBEEING_FUNCTIONS.get(config.wellbeeing_function)
         self.previousSensors = []
+        if len(config.states) > 0:
+            self.state = config.states[0] # start in the first state
+        else:
+            self.state = None
 
     def wellbeeing(self):
         return self._wellbeeingFunc(self.needs, self.config.wellbeeing_const)
@@ -135,6 +141,12 @@ class Agent:
         reward = self.environment.takeAction(self, action)
         surprise = relative_surprise(prediction, reward)
         print ">>> SURPRISE", surprise, numPredictions, prediction, reward
+
+        # agent state change caused by action
+        new_state = self.config.state_change.get(action)
+        if new_state != None and new_state != self.state:
+            print "AGENT STATE CHANGE: '", self.state, "' -> '", new_state,"'"
+            self.state = new_state
 
         self.trail.append( (cell, action) )
         self.wellbeeingTrail.append( self.wellbeeing() )
@@ -227,7 +239,7 @@ class Agent:
         newTopnodes = self.network.activeTopNodes(includeVirtual=False)
         previousTop = self._learningData['previousTop']
 
-        score,q_action,Q = self.network.getBestAction(self.needs, epsilon=0)
+        score,q_action,Q = self.network.getBestAction(self.needs, allowExploration=False, epsilon=0)
         Qst1a = {obj:x['weighted'] for obj,x in Q.items()}
 
         print ">>> END LEARNING", motor, reward, Qst1a, [x.getName() for x in nodes]
