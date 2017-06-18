@@ -27,9 +27,14 @@ N_REPEATS = 1
 
 if __name__ == "__main__":
 #    conf = json.load(file("examples/example-1-copepod.json"))
-    conf = json.load(file("examples/example-2-sheep.json"))
+#    conf = json.load(file("examples/example-2-sheep.json"))
 #    conf = json.load(file("examples/example-3-swamp.json"))
 #    conf = json.load(file("examples/example-4-seq.json"))
+    conf = json.load(file("examples/example-5-frog.json"))
+#    conf = json.load(file("examples/example-6-toad_no_proprioception.json"))
+#    conf = json.load(file("examples/example-7-toad_with_proprioception.json"))
+#    conf = json.load(file("examples/example-8-fish_1.json"))
+#    conf = json.load(file("examples/example-9-fish_2.json"))
 
     config = EnvironmentConfig(conf)
     print conf

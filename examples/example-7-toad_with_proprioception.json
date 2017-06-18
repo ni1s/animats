@@ -1,0 +1,45 @@
+{
+  "description": "Learn to use alternating left and right leg to move.",
+  "iterations": 100,
+  "world":"bbbbbb",
+  "torus":true,
+  "objectives":["energy"],
+  "blocks": {
+    "b":  {"blue":1}
+  },
+  "rewards":{
+    "left leg": { "right leg extended":{"energy":0.01}, "*":{"energy":-0.01} },
+    "right leg": { "left leg extended":{"energy":0.01}, "*":{"energy":-0.01} },
+    "both legs": { "*":{"energy":-0.01} }
+  },
+  "agent":{
+    "wellbeeing_const": { "energy": 0 },
+    "wellbeeing_function": "min",
+    "surprise_const": 2.0,
+    "features":{"SEQ":1, "AND":1},
+    "network":{
+      "sensors": { "world":["blue"], "agent":["left leg", "right leg"] },
+      "motors":["left leg", "right leg", "both legs"],
+      "epsilon":0.1,
+      "utility_function": "min+",
+      "q_function": "mean",
+      "max_reward_history": 10,
+      "q_learning_factor":0.1,
+      "q_discount_factor":0.5,
+      "reward_learning_factor": 0.5
+    },
+    "states": ["left leg extended", "right leg extended", "both legs extended"],
+    "state change": {
+      "left leg": "left leg extended",
+      "right leg": "right leg extended",
+      "both legs": "both legs extended"
+    },
+    "PLOTTER_ENABLED":true,
+    "PLOTTER_EVERY_FRAME":false
+  },
+  "movement":{
+    "left leg": {"right leg extended": "right"},
+    "right leg": {"left leg extended": "right"},
+    "both legs": {}
+  }
+}

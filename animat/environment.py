@@ -18,12 +18,14 @@
 #
 
 import os, os.path
+import errno
 import datetime
 import itertools
 import random
 from network import *
 from agent import *
 from sensor import *
+from proprioceptor import *
 from motor import *
 
 def makeRewardDict(reward, needs):
@@ -51,7 +53,8 @@ class EnvironmentConfig:
         self.agent = AgentConfig(conf.get("agent"))
         self.maxIterations = conf.get("iterations", 100)
         self.transform = conf.get("transform", {})
-        self.outputPath = os.path.join('output', datetime.datetime.now().isoformat())
+        self.movement = conf.get("movement", {})
+        self.outputPath = os.path.join('output', datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S.%f"))
         createPath(self.outputPath)
 
 class Environment:
@@ -123,28 +126,24 @@ class VirtualEnvironment(Environment):
         x = self.agent.position[0] % len(self.world[y])
         self.world[y][x] = v
 
-    def readSensor(self, x, delta=(0,0)):
-        if x == 't': return 1
-        cell = self.currentCell(delta)
-        observation = self.config.blocks.get(cell,{})
-        return observation.get(x,0)
-
     # Create a basic network that supports this environment
     def createNetwork(self, conf):
-        def makeSensor(env, cell, delta=(0,0)):
-            return lambda t: env.readSensor(cell, delta)
-        sensors = [SensorNode("$"+sensor, makeSensor(self, sensor)) for sensor in conf.sensors]
+        sensors = [SensorNode("$"+sensor, sensor, self) for sensor in conf.world_sensors]
+        for sensor in conf.agent_sensors:
+            sensors.append(ProprioceptorNode("$"+sensor, sensor))
         motors = [Motor(motor) for motor in conf.motors] #, 'wait']]
         return Network(conf, sensors, motors, self.objectives)
 
     def createAgent(self, conf):
         self.agent = Agent(conf, self, self.createNetwork(conf.network), {k:1 for k in self.objectives}, (0,0))
+        for sensor in self.agent.network.sensors:
+            sensor.addAgent(self.agent)
         return self.agent
 
     def _getReward(self, action, cell, status):
         rm = self.config.rewardMatrix
         am = rm.get(action, rm.get('*',{}))
-        r = am.get(cell, am.get('*',0.0))
+        r = am.get(cell, am.get(self.agent.state, am.get('*',0.0)))
         reward = makeRewardDict(r, status)
         # TODO: truncate reward if need is satisfied
         return reward
@@ -166,27 +165,42 @@ class VirtualEnvironment(Environment):
                 agent.position = (nx, ny)
 #            print "PP NEW", agent.position
 
-        if action == 'up':
+        # check if there is a rule how to translate the selected agent action into an agent movement
+        if type(self.config.movement) == dict:
+            action_states = self.config.movement.get(action, None)
+            if type(action_states) is dict:
+                # if there is a match for the current action then select the corresponding base action
+                # and if there was no match for the current action, check for a match for the current cell
+                base_action = action_states.get(agent.state, action_states.get(cell, None))
+            else:
+                base_action = action
+        else:
+            # there was no 'movement' configuration, use the action as a base state
+            base_action = action
+
+        if base_action == 'up':
             dx,dy = ORIENTATION_MATRIX[agent.orientation%8]
             move_agent(agent, dx, dy)
-        elif action == 'down':
+        elif base_action == 'down':
             dx,dy = ORIENTATION_MATRIX[(agent.orientation+4)%8]
             move_agent(agent, dx, dy)
-        elif action == 'left':
+        elif base_action == 'left':
             dx,dy = ORIENTATION_MATRIX[(agent.orientation-2)%8]
             move_agent(agent, dx, dy)
-        elif action == 'right':
+        elif base_action == 'right':
             dx,dy = ORIENTATION_MATRIX[(agent.orientation+2)%8]
             move_agent(agent, dx, dy)
-        elif action == 'turn_right':
+        elif base_action == 'turn_right':
             agent.orientation = (agent.orientation+1)%8
             self._playback(agent, action)
-        elif action == 'turn_left':
+        elif base_action == 'turn_left':
             agent.orientation = (agent.orientation-1)%8
             self._playback(agent, action)
-        elif action == 'eat':
+        elif base_action == 'eat':
             self._playback(agent, action)
-        elif action == 'drink':
+        elif base_action == 'drink':
+            self._playback(agent, action)
+        else:
             self._playback(agent, action)
 
         trans = self.config.transform.get(action,{}).get(cell, None)

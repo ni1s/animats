@@ -90,6 +90,10 @@ class Node:
         if node not in self.outputs:
             self.outputs.append(node)
 
+    # Virtual method, override in sub-class if agent is needed
+    def addAgent(self, agent):
+        return
+
     # TODO: Should we handle previousActive here, or in tick?
     # Does previousActive mean it was active the previous tick, or should a node
     # be able to remain active until it's updated again. Stochastic updates?

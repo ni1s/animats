@@ -22,7 +22,7 @@
     "wellbeeing_function": "min",
     "surprise_const": 2.0,
     "network":{
-      "sensors":["r", "g", "b"],
+      "sensors":{ "world":["r", "g", "b"] },
       "motors":["up", "down", "eat", "drink"],
       "epsilon":0.1,
       "utility_function": "min+",

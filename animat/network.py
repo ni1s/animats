@@ -89,7 +89,9 @@ class NetworkConfig:
         self.q_learning_factor = conf.get("q_learning_factor", 0.1)
         self.q_discount_factor = conf.get("q_discount_factor", 0.5)
         self.reward_learning_factor = conf.get("reward_learning_factor", 0.5)
-        self.sensors = conf.get("sensors", "rgb0")
+        all_senosrs = conf.get("sensors", "")
+        self.world_sensors = all_senosrs.get("world", "rgb0")
+        self.agent_sensors = all_senosrs.get("agent", "")
         self.motors = conf.get("motors", ["left", "right", "up", "down", "eat", "drink"])
 
 class Network:
@@ -226,7 +228,7 @@ class Network:
                     R[objective] = R[objective] + action.getR(objective)
         return {k:v/C for k,v in R.items()}, N
 
-    def getBestAction(self, status, epsilon=None):
+    def getBestAction(self, status, allowExploration=True, epsilon=None):
         actions = {motor.name:[] for motor in self.motors}
         for action in self.availableActions():
             actions[action.motor.name].append(action)
@@ -259,7 +261,7 @@ class Network:
             return None
 
         epsilon = epsilon or self.config.epsilon
-        if random.random() < epsilon:
+        if allowExploration and random.random() < epsilon:
             bestAction = random.choice(actions)
         else:
             bestAction = actions[0]

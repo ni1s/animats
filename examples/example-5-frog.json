@@ -1,0 +1,37 @@
+{
+  "description": "Learn to use both legs to move.",
+  "iterations": 100,
+  "world":"bbbbb",
+  "torus":true,
+  "objectives":["energy"],
+  "blocks": {
+    "b":  {"blue":1}
+  },
+  "rewards":{
+    "left leg": { "*":{"energy":-0.01} },
+    "right leg": { "*":{"energy":-0.01} },
+    "both legs": { "*":{"energy":0.01} }
+  },
+  "agent":{
+    "wellbeeing_const": { "energy": 0 },
+    "wellbeeing_function": "min",
+    "surprise_const": 2.0,
+    "network":{
+      "sensors": { "world":["blue"] },
+      "motors":["left leg", "right leg", "both legs"],
+      "epsilon":0.1,
+      "utility_function": "min+",
+      "q_function": "mean",
+      "max_reward_history": 10,
+      "q_learning_factor":0.1,
+      "q_discount_factor":0.5,
+      "reward_learning_factor": 0.5
+    },
+    "states": ["dummy state"],
+    "PLOTTER_ENABLED":true,
+    "PLOTTER_EVERY_FRAME":false
+  },
+  "movement":{
+    "both legs": {"dummy state": "right"}
+  }
+}

@@ -28,7 +28,7 @@
     "surprise_const": 2.0,
     "features":{"SEQ":0, "AND":9},
     "network":{
-      "sensors":["1", "2"],
+      "sensors":{ "world":["1", "2"] },
       "motors":["eat", "up", "turn_right", "turn_left"],
       "epsilon":0.1,
       "utility_function": "min+",

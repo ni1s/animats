@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #
 #    pyAnimat - Simulate Animats using Transparent Graphs as a way to AGI
-#    Copyright (C) 2017  Nils Svangård, Claes Strannegård
+#    Copyright (C) 2017  David Lindström
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
@@ -20,25 +20,31 @@
 from node import *
 
 
-class SensorNode(Node):
-    def __init__(self, name, sensor, environment):
+class ProprioceptorNode(Node):
+    def __init__(self, name, sensor, agent=None):
         Node.__init__(self, name, permanent=True)
-        self.sensor=sensor
-        self.environment=environment
+        self.agent = agent
+        self.sensor = sensor
 
     def tick(self, time):
+        state = False
         if Node.tick(self, time):
-            x = self.readSensor()
-            if x: self.activate(time)
-            else: self.deactivate(time)
+            # set sensor active if the related motor was selected as the last action
+            sensor_state = self.readSensor()
+            if sensor_state != None:
+                if (sensor_state == self.sensor):
+                    self.activate(time)
+                else:
+                    self.deactivate(time)
             return True
         else:
             return False
 
-    def readSensor(self):
-        if self.sensor == 't': return 1
-        delta=(0,0)
-        cell = self.environment.currentCell(delta)
-        observation = self.environment.config.blocks.get(cell,{})
-        return observation.get(self.sensor,0)
+    def addAgent(self, agent):
+        self.agent = agent
 
+    def readSensor(self):
+        if len(self.agent.trail) > 0:
+            return self.agent.trail[-1][1]
+        else:
+            return None

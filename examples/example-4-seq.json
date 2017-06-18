@@ -29,7 +29,7 @@
     "surprise_const": 2.0,
     "features":{"SEQ":1, "AND":1},
     "network":{
-      "sensors":["1", "2", "3", "4"],
+      "sensors":{ "world":["1", "2", "3", "4"] },
       "motors":["eat", "drink", "right"],
       "epsilon":0.1,
       "utility_function": "min+",
